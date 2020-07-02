@@ -63,7 +63,7 @@
                         <el-table-column type="expand">
                             <template slot-scope="scope">
                                 <!-- 循环渲染标签 -->
-                                <el-tag closable v-for="(item,i) in scope.row.attr_vals" :key="i">{{item}}</el-tag>
+                                <el-tag closable v-for="(item,i) in scope.row.attr_vals" :key="i" @close="delTag(i,scope.row)">{{item}}</el-tag>
                                 <!-- 输入框和标签切换 -->
                                 <el-input
                                     class="input-new-tag"
@@ -292,7 +292,6 @@ export default {
             this.saveAttrVals(row)
         },
         async saveAttrVals(row) {
-            row.attr_vals.push(row.inputValue.trim())
             console.log(row.attr_vals)
             const{data:res} = await this.$http.put(`categories/${this.catId}/attributes/${row.attr_id}`,{attr_name: row.attr_name, attr_sel: row.attr_sel, attr_vals: row.attr_vals.join(' ')})
             console.log(row)
