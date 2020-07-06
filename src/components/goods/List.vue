@@ -50,79 +50,79 @@
 </template>
 <script>
 export default {
-    created() {
-        //创建时渲染商品列表
-        this.getGoodsList()
-    },
-    data() {
-        return {
-            //请求参数信息
-            queryInfo: {
-                query: '',
-                pagenum: 1,
-                pagesize: 10
-            },
-            //商品搜索关键字
-            goodsKeyword: '',
-            //商品数据信息
-            goodsData: [],
-            //商品总数
-            goodsTotal: 0
-        }
-    },
-    methods: {
-        //获取商品信息
-        async getGoodsList() {
-            this.queryInfo.query = this.goodsKeyword
-            const{ data: res} = await this.$http.get('goods',{params: this.queryInfo})
-            console.log(res)
-            //将时间由毫秒转换为正常格式
-            res.data.goods.forEach( (item,index) => {
-                item.add_time = new Date(item.add_time).toLocaleString()
-                item.upd_time = new Date(item.upd_time).toLocaleString()
-            })
-            if(res.meta.status !== 200) return this.$message.error("获取商品列表失败")
-            this.goodsData = res.data.goods
-            this.goodsTotal = res.data.total
-            if(this.goodsData.length == 0) {
-                this.$message("未搜索到相关商品")
-            }else {
-                this.$message.success("获取商品列表成功")
-            }
-        },
-        //页面大小改变
-        handleSizeChange(newSize) {
-            this.queryInfo.pagesize = newSize
-            this.getGoodsList()
-        },
-        //页码改变
-        handleCurrentChange(newPage) {
-            this.queryInfo.pagenum = newPage
-            this.getGoodsList()
-        },
-        //删除商品
-        async removeGoods(item) {
-            //弹出提示框
-            const confirm = await this.$confirm('此操作将永久删除该商品, 是否继续?', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            })
-            if(confirm == 'confirm') {
-                //删除商品
-                this.$http.delete(`goods/${item.goods_id}`)
-                this.$message.success("删除商品成功")
-                this.getGoodsList()
-            }else {
-                //取消删除
-                this.$message("取消删除")
-            }
-        },
-        //前往添加商品页面
-        toAddGoodsPath() {
-            this.$router.push('/goods/add')
-        }
+  created () {
+    // 创建时渲染商品列表
+    this.getGoodsList()
+  },
+  data () {
+    return {
+      // 请求参数信息
+      queryInfo: {
+        query: '',
+        pagenum: 1,
+        pagesize: 10
+      },
+      // 商品搜索关键字
+      goodsKeyword: '',
+      // 商品数据信息
+      goodsData: [],
+      // 商品总数
+      goodsTotal: 0
     }
+  },
+  methods: {
+    // 获取商品信息
+    async getGoodsList () {
+      this.queryInfo.query = this.goodsKeyword
+      const { data: res } = await this.$http.get('goods', { params: this.queryInfo })
+      console.log(res)
+      // 将时间由毫秒转换为正常格式
+      res.data.goods.forEach((item, index) => {
+        item.add_time = new Date(item.add_time).toLocaleString()
+        item.upd_time = new Date(item.upd_time).toLocaleString()
+      })
+      if (res.meta.status !== 200) return this.$message.error('获取商品列表失败')
+      this.goodsData = res.data.goods
+      this.goodsTotal = res.data.total
+      if (this.goodsData.length == 0) {
+        this.$message('未搜索到相关商品')
+      } else {
+        this.$message.success('获取商品列表成功')
+      }
+    },
+    // 页面大小改变
+    handleSizeChange (newSize) {
+      this.queryInfo.pagesize = newSize
+      this.getGoodsList()
+    },
+    // 页码改变
+    handleCurrentChange (newPage) {
+      this.queryInfo.pagenum = newPage
+      this.getGoodsList()
+    },
+    // 删除商品
+    async removeGoods (item) {
+      // 弹出提示框
+      const confirm = await this.$confirm('此操作将永久删除该商品, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+      if (confirm == 'confirm') {
+        // 删除商品
+        this.$http.delete(`goods/${item.goods_id}`)
+        this.$message.success('删除商品成功')
+        this.getGoodsList()
+      } else {
+        // 取消删除
+        this.$message('取消删除')
+      }
+    },
+    // 前往添加商品页面
+    toAddGoodsPath () {
+      this.$router.push('/goods/add')
+    }
+  }
 }
 </script>
 <style lang="less" scoped>

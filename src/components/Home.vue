@@ -10,7 +10,7 @@
 		<el-container>
 			<el-aside :width = "isCollapse ? '65px' : '200px'">
 				<div class="toggleCollapse" @click="toggle">|||</div>
-				<el-menu class="elMenu" background-color="#333744" text-color="#fff" unique-opened 
+				<el-menu class="elMenu" background-color="#333744" text-color="#fff" unique-opened
 				:collapse="isCollapse" :collapse-transition="false" router :default-active="activePath">
       				<el-submenu :index="item.id + ''" v-for="item in menulist" :key="item.id">
 						  <!-- 一级菜单 -->
@@ -36,45 +36,44 @@
 </template>
 
 <script>
-	export default {
-		created() {
-			this.getMenulist()
-			this.activePath = window.sessionStorage.getItem('currentPath')
-		},
-		data() {
-			return {
-				menulist: [],
-				iconsObj: {
-					'125': 'iconfont icon-user',
-					'103': 'iconfont icon-tijikongjian',
-					'101': 'iconfont icon-shangpin',
-					'102': 'iconfont icon-danju',
-					'145': 'iconfont icon-baobiao'
-				},
-				isCollapse: false,
-				activePath: ''
-			}
-			
-		},
-		methods: {
-			logout() {
-				window.sessionStorage.clear();
-				this.$router.push('/login')
-			},
-			async getMenulist() {
-				const { data: ret } = await this.$http.get('menus');
-				this.menulist = ret.data
-				console.log(ret.data)
-			},
-			toggle() {
-				this.isCollapse = !this.isCollapse
-			},
-			active(currentPath) {
-				window.sessionStorage.setItem('currentPath', currentPath) 
-				this.activePath = currentPath
-			}
-		}
-	}
+export default {
+  created () {
+    this.getMenulist()
+    this.activePath = window.sessionStorage.getItem('currentPath')
+  },
+  data () {
+    return {
+      menulist: [],
+      iconsObj: {
+        125: 'iconfont icon-user',
+        103: 'iconfont icon-tijikongjian',
+        101: 'iconfont icon-shangpin',
+        102: 'iconfont icon-danju',
+        145: 'iconfont icon-baobiao'
+      },
+      isCollapse: false,
+      activePath: ''
+    }
+  },
+  methods: {
+    logout () {
+      window.sessionStorage.clear()
+      this.$router.push('/login')
+    },
+    async getMenulist () {
+      const { data: ret } = await this.$http.get('menus')
+      this.menulist = ret.data
+      console.log(ret.data)
+    },
+    toggle () {
+      this.isCollapse = !this.isCollapse
+    },
+    active (currentPath) {
+      window.sessionStorage.setItem('currentPath', currentPath)
+      this.activePath = currentPath
+    }
+  }
+}
 </script>
 
 <style lang="less" scoped>

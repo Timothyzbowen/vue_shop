@@ -70,73 +70,73 @@
 </template>
 <script>
 export default {
-    created() {
-        this.getRolelist();
-    },
-    data() {
-        return {
-            rolelist: [],
-            rightslist: [],
-            setRightDialogVisible: false,
-            treeProps: {
-                children: 'children',
-                label: 'authName'
-            },
-            defKey: [],
-            roleid: ''
-        }
-    },
-    methods: {
-        async getRolelist() {
-            const{ data: res } = await this.$http.get('roles')
-            console.log(res)
-            this.rolelist = res.data
-        },
-        async removeRoleById(role, rightId) {
-            const confirmResult = await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).catch(err => err)
-        if(confirmResult !== 'confirm'){
-            return this.$message.info('删除取消')
-        }else{
-            const{data: res} = await this.$http.delete(`roles/${role.id}/rights/${rightId}`)
-            if(res.meta.status !== 200) return this.$message.info('删除失败')
-            if(res.meta.status == 200) {
-                this.$message.success("删除成功")
-                role.children = res.data
-            }
-        }
-        },
-        async showSetRightsDialog(role) {
-            this.roleid = role.id
-            const{data: res} = await this.$http.get('rights/tree')
-            if(res.meta.status !== 200) return this.$message.info('获取权限列表失败')
-            this.rightslist = res.data
-            this.getdefKey(role,this.defKey)
-            console.log(this.defKey)
-            this.setRightDialogVisible = true
-        },
-        getdefKey(node, arr) {
-            if(!node.children) {
-                return arr.push(node.id)
-            }
-            node.children.forEach(item => {
-                this.getdefKey(item,arr)
-            })
-        },
-        setRightDialogClose() {
-            this.defKey = []
-        },
-        async allotRight() {
-            const ridarr = [...this.$refs.treeRef.getCheckedKeys(), ...this.$refs.treeRef.getHalfCheckedKeys()]
-            const ridstr = ridarr.join(',')
-            const{data: res} = await this.$http.post(`roles/${this.roleid}/rights`, {rids: ridstr})
-            this.getRolelist()
-            this.setRightDialogVisible = false
-        }
+  created () {
+    this.getRolelist()
+  },
+  data () {
+    return {
+      rolelist: [],
+      rightslist: [],
+      setRightDialogVisible: false,
+      treeProps: {
+        children: 'children',
+        label: 'authName'
+      },
+      defKey: [],
+      roleid: ''
     }
+  },
+  methods: {
+    async getRolelist () {
+      const { data: res } = await this.$http.get('roles')
+      console.log(res)
+      this.rolelist = res.data
+    },
+    async removeRoleById (role, rightId) {
+      const confirmResult = await this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
+      if (confirmResult !== 'confirm') {
+        return this.$message.info('删除取消')
+      } else {
+        const { data: res } = await this.$http.delete(`roles/${role.id}/rights/${rightId}`)
+        if (res.meta.status !== 200) return this.$message.info('删除失败')
+        if (res.meta.status == 200) {
+          this.$message.success('删除成功')
+          role.children = res.data
+        }
+      }
+    },
+    async showSetRightsDialog (role) {
+      this.roleid = role.id
+      const { data: res } = await this.$http.get('rights/tree')
+      if (res.meta.status !== 200) return this.$message.info('获取权限列表失败')
+      this.rightslist = res.data
+      this.getdefKey(role, this.defKey)
+      console.log(this.defKey)
+      this.setRightDialogVisible = true
+    },
+    getdefKey (node, arr) {
+      if (!node.children) {
+        return arr.push(node.id)
+      }
+      node.children.forEach(item => {
+        this.getdefKey(item, arr)
+      })
+    },
+    setRightDialogClose () {
+      this.defKey = []
+    },
+    async allotRight () {
+      const ridarr = [...this.$refs.treeRef.getCheckedKeys(), ...this.$refs.treeRef.getHalfCheckedKeys()]
+      const ridstr = ridarr.join(',')
+      const { data: res } = await this.$http.post(`roles/${this.roleid}/rights`, { rids: ridstr })
+      this.getRolelist()
+      this.setRightDialogVisible = false
+    }
+  }
 }
 </script>
 <style lang="less" scoped>

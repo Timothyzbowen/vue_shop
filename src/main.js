@@ -12,7 +12,7 @@ import 'quill/dist/quill.core.css' // import styles
 import 'quill/dist/quill.snow.css' // for snow theme
 import 'quill/dist/quill.bubble.css' // for bubble theme
 
-Vue.use(VueQuillEditor, /* { default global options } */)
+Vue.use(VueQuillEditor /* { default global options } */)
 Vue.config.productionTip = false
 Vue.component(ZkTable.name, ZkTable)
 axios.defaults.baseURL = 'http://127.0.0.1:8888/api/private/v1/'

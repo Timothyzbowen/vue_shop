@@ -79,125 +79,126 @@
 </template>
 <script>
 export default {
-    created() {
-        this.getCateList()
-    },
-    data() {
-      return {
-        queryInfo: {
-            type: 3,
-            pagenum: 1,
-            pagesize: 5
-        },
-        props: {
-          stripe: false,
-          border: true,
-          showHeader: true,
-          showRowHover: false,
-          showIndex: true,
-          treeType: true,
-          isFold: true,
-          expandType: false,
-          selectionType: false,
-        },
-        cateList: [],
-        total: 0,
-        addCateDialogVisible: false,
-        addCateForm: {
-            cat_name: '',
-            cat_pid: 0,
-            cat_level: 0,
-        },
-        CateFormRules: {
-            cat_name: [
-                { required: true, message: '请输入分类名称', trigger: 'blur' }
-            ]
-        },
-        //获取一二级分类列表
-        parentCateList: [],
-        // 选中的二级分类的数组
-        selectedKeys: [],
-        cascaderProps: {  
-                        value: 'cat_id',
-                        label: 'cat_name',
-                        children: 'children',
-                        checkStrictly: true},
-        columns: [
-          {
-            label: '分类名称',
-            prop: 'cat_name',
-          },
-          {
-            label: '是否有效',
-            type: 'template',
-            template: 'isvalidate'
-          },
-          {
-            label: '排序',
-            type: 'template',
-            template: 'order'
-          },
-          {
-            label: '操作',
-            type: 'template',
-            template: 'set'
-          }
+  created () {
+    this.getCateList()
+  },
+  data () {
+    return {
+      queryInfo: {
+        type: 3,
+        pagenum: 1,
+        pagesize: 5
+      },
+      props: {
+        stripe: false,
+        border: true,
+        showHeader: true,
+        showRowHover: false,
+        showIndex: true,
+        treeType: true,
+        isFold: true,
+        expandType: false,
+        selectionType: false
+      },
+      cateList: [],
+      total: 0,
+      addCateDialogVisible: false,
+      addCateForm: {
+        cat_name: '',
+        cat_pid: 0,
+        cat_level: 0
+      },
+      CateFormRules: {
+        cat_name: [
+          { required: true, message: '请输入分类名称', trigger: 'blur' }
         ]
+      },
+      // 获取一二级分类列表
+      parentCateList: [],
+      // 选中的二级分类的数组
+      selectedKeys: [],
+      cascaderProps: {
+        value: 'cat_id',
+        label: 'cat_name',
+        children: 'children',
+        checkStrictly: true
+      },
+      columns: [
+        {
+          label: '分类名称',
+          prop: 'cat_name'
+        },
+        {
+          label: '是否有效',
+          type: 'template',
+          template: 'isvalidate'
+        },
+        {
+          label: '排序',
+          type: 'template',
+          template: 'order'
+        },
+        {
+          label: '操作',
+          type: 'template',
+          template: 'set'
+        }
+      ]
+    }
+  },
+  methods: {
+    async getCateList () {
+      const { data: res } = await this.$http.get('categories', { params: this.queryInfo })
+      this.cateList = res.data.result
+      this.total = res.data.total
+    },
+    handleSizeChange (newSize) {
+      this.queryInfo.pagesize = newSize
+      this.getCateList()
+    },
+    handleCurrentChange (newNum) {
+      this.queryInfo.pagenum = newNum
+      this.getCateList()
+    },
+    showAddCateDialog () {
+      this.addCateDialogVisible = true
+      this.getParentCateList()
+    },
+    async getParentCateList () {
+      const { data: res } = await this.$http.get('categories', { params: { type: 2 } })
+      this.parentCateList = res.data
+    },
+    // 级联选择器选择过后
+    parentCateChanged () {
+      if (this.selectedKeys.length > 0) {
+        this.addCateForm.cat_level = this.selectedKeys.length
+        this.addCateForm.cat_pid = this.selectedKeys[this.selectedKeys.length - 1]
+      } else {
+        this.addCateForm.cat_level = 0
+        this.addCateForm.cat_pid = 0
       }
     },
-    methods: {
-        async getCateList() {
-            const{data: res} = await this.$http.get('categories',{params: this.queryInfo})
-            this.cateList = res.data.result
-            this.total = res.data.total
-        },
-        handleSizeChange(newSize) {
-            this.queryInfo.pagesize = newSize
-            this.getCateList()
-        },
-        handleCurrentChange(newNum) {
-            this.queryInfo.pagenum = newNum
-            this.getCateList()
-        },
-        showAddCateDialog() {
-            this.addCateDialogVisible = true
-            this.getParentCateList()
-        },
-        async getParentCateList() {
-            const{data: res} = await this.$http.get('categories',{params: { type: 2 }})
-            this.parentCateList = res.data
-        },
-        //级联选择器选择过后
-        parentCateChanged() {
-            if(this.selectedKeys.length > 0 ) {
-                this.addCateForm.cat_level = this.selectedKeys.length
-                this.addCateForm.cat_pid = this.selectedKeys[this.selectedKeys.length - 1]
-            }else {
-                    this.addCateForm.cat_level = 0
-                    this.addCateForm.cat_pid = 0 
-                }
-        },
-        //确定增加分类
-        async addCate() {
-            this.$refs.CateFormRef.validate(async valid => {
-                if (!valid) return
-                    const{data: res} = await this.$http.post('categories', this.addCateForm)
-                    if(res.meta.status === 201) this.$message.success('添加成功')
-                    if(res.meta.status !== 201) this.$message.error('添加失败')
-                    this.addCateDialogVisible = false
-                    this.getCateList()
-                }
-            )
-        },
-        resetForm() {
-            this.$refs.CateFormRef.resetFields()
-            this.addCateDialogVisible = false
-            this.selectedKeys = []
-            this.addCateForm.cat_level = 0
-            this.addCateForm.cat_pid = 0
-        }
-
+    // 确定增加分类
+    async addCate () {
+      this.$refs.CateFormRef.validate(async valid => {
+        if (!valid) return
+        const { data: res } = await this.$http.post('categories', this.addCateForm)
+        if (res.meta.status === 201) this.$message.success('添加成功')
+        if (res.meta.status !== 201) this.$message.error('添加失败')
+        this.addCateDialogVisible = false
+        this.getCateList()
+      }
+      )
+    },
+    resetForm () {
+      this.$refs.CateFormRef.resetFields()
+      this.addCateDialogVisible = false
+      this.selectedKeys = []
+      this.addCateForm.cat_level = 0
+      this.addCateForm.cat_pid = 0
     }
+
+  }
 }
 </script>
 <style lang="less" scoped>

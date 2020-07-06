@@ -92,8 +92,7 @@
                     </el-tab-pane>
                 </el-tabs>
             </el-form>
-               
-            
+
         </el-card>
         <!-- 预览图片对话框 -->
         <el-dialog
@@ -105,190 +104,189 @@
     </div>
 </template>
 <script>
-    import _ from 'lodash'
+import _ from 'lodash'
 export default {
 
-    created() {
-        this.getCateList()
-    },
-    data() {
-        var checkGoodsNum = (rule, value, callback) => {
-            const regNum = /^\d+$/
-            if(regNum.test(value)) {
-                callback();
-            }else {
-                callback(new Error("请输入非负整数"));
-            }
-        }
-        var checkGoodsPrice = (rule, value, callback) => {
-            const regNum = /^\d+(\.{0,1}\d+){0,1}$/
-            if(regNum.test(value)) {
-                callback();
-            }else {
-                callback(new Error("请输入非负数"));
-            }
-        }
-        return {
-            //当前激活的步骤
-            active: 0,
-            //商品信息
-            goodsForm: {
-                goods_name: '',
-                goods_cat: [],
-                goods_price: 0,
-                goods_weight: 0,
-                goods_number: 0,
-                attrs: [],
-                pics: [ 
-                ],
-                goods_introduce: ''
-            },
-            //验证规则
-            goodsRules: {
-                goods_name: { required: true, message: '请输入商品名称', trigger: 'blur' },
-                goods_price: [ 
-                    { required: true, message: '请输入商品价格', trigger: 'blur' },
-                    { validator: checkGoodsPrice, trigger: 'blur'}
-                ],
-                goods_weight: [ 
-                    { required: true, message: '请输入商品重量', trigger: 'blur' },
-                    { validator: checkGoodsPrice, trigger: 'blur'}
-                ],
-                goods_number: [ 
-                    { required: true, message: '请输入商品数量', trigger: 'blur' },
-                    { validator: checkGoodsNum, trigger: 'blur'}
-                ]
-            },
-            //级联选择器数据
-            cateList: [],
-            selectedKeys: [],
-            cascaderProps: {
-                value: 'cat_id',
-                label: 'cat_name',
-                children: 'children'
-            },
-            //动态参数数组
-            manyVals: [],
-            //静态属性数组
-            onlyVals: [],
-            //商品图片数组
-            fileList: [ 
-                
-            ],
-            //头部请求对象
-            headerObj: {
-                Authorization: window.sessionStorage.getItem('token')
-            },
-            //图片预览对话框可见
-            imgPreviewDialogVisible: false,
-            //当前图片路径
-            curentImgPath: ''
-        }
-    },
-    methods: {
-        //商品价格改变
-        priceChange() {
-
-        },
-        //商品重量改变
-        weightChange() {
-
-        },
-        //商品数量改变
-        numberChange() {
-
-        },
-        //获取分类列表
-        async getCateList() {
-            const{data: res} = await this.$http.get('categories',{params: {type: 3}})
-            this.cateList = res.data
-        },
-        //检查分类列表是否被选择
-        checkCateList() {
-            console.log(this.selectedKeys)
-            if(this.selectedKeys.length !== 3) {
-                this.$message.warning("请选择商品分类")
-                return false
-            }else return true
-        },
-        //获取选中tabs的序号
-        getTabIndex(item) {
-            if(this.checkCateList()){
-                this.active = parseInt(item.name)
-            }
-        },
-        //级联选择器已选中,获取参数信息
-        async hasChoosen() {
-            const{data: resOnly} = await this.$http.get(`categories/${this.selectedKeys[2]}/attributes`,{params: {sel: 'only'}})
-            const{data: resMany} = await this.$http.get(`categories/${this.selectedKeys[2]}/attributes`,{params: {sel: 'many'}})
-            //将参数值转换成数组
-            resMany.data.forEach(item => {
-                item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
-            })
-            //将数据存储到参数数组
-            this.manyVals = resMany.data
-            this.onlyVals = resOnly.data
-            //将选中id赋值给goods_cat
-            this.goodsForm.goods_cat = this.selectedKeys
-            console.log(resOnly)
-            console.log(resMany)
-        },
-        //预览图片
-        handlePreview(file) {
-            this.imgPreviewDialogVisible = true
-            this.curentImgPath = file.url
-        },
-        //将图片临时路径存储到对象中
-        handleSuccess(res) {
-            const newPic = {
-                pic: res.data.tmp_path
-            }
-            this.goodsForm.pics.push(newPic)
-        },
-        handleRemove(file) {
-            const filePath = file.response.data.tmp_path
-            const index = this.goodsForm.pics.findIndex( ele => 
-                ele.pic === filePath
-            )
-        },
-        //添加商品
-        addGoods() {
-            this.$refs.goodsRuleFormRef.validate( async (valid,failValue) => {
-                if( !valid ) {
-                    return this.$message.error("请按规范填写表单")
-                }
-                if(valid) {
-                    const form = _.cloneDeep(this.goodsForm)
-                    //将selectedKeys转换为字符串储存到goods_cat
-                    console.log(form)
-                    form.goods_cat = form.goods_cat.join(',')
-                    this.manyVals.forEach( item => {
-                        const newInfo = { 
-                            attr_id:  item.attr_id,
-                            attr_value: item.attr_vals.join(' ')
-                        }
-                        this.goodsForm.attrs.push(newInfo)
-                    })
-                    this.onlyVals.forEach( item => {
-                        const newInfo = { 
-                            attr_id:  item.attr_id,
-                            attr_value:  item.attr_vals
-                        }
-                        this.goodsForm.attrs.push(newInfo)
-                    })
-                    form.attrs = this.goodsForm.attrs
-                    //3.发送数据
-                    const{data: res} = await this.$http.post('goods', form)
-                    if(res.meta.status !== 201) { 
-                        return this.$message("添加商品失败")
-                    }
-                    this.$message.success("添加商品成功")
-                    this.active = 5
-                }
-                
-            })
-        }
+  created () {
+    this.getCateList()
+  },
+  data () {
+    var checkGoodsNum = (rule, value, callback) => {
+      const regNum = /^\d+$/
+      if (regNum.test(value)) {
+        callback()
+      } else {
+        callback(new Error('请输入非负整数'))
+      }
     }
+    var checkGoodsPrice = (rule, value, callback) => {
+      const regNum = /^\d+(\.{0,1}\d+){0,1}$/
+      if (regNum.test(value)) {
+        callback()
+      } else {
+        callback(new Error('请输入非负数'))
+      }
+    }
+    return {
+      // 当前激活的步骤
+      active: 0,
+      // 商品信息
+      goodsForm: {
+        goods_name: '',
+        goods_cat: [],
+        goods_price: 0,
+        goods_weight: 0,
+        goods_number: 0,
+        attrs: [],
+        pics: [
+        ],
+        goods_introduce: ''
+      },
+      // 验证规则
+      goodsRules: {
+        goods_name: { required: true, message: '请输入商品名称', trigger: 'blur' },
+        goods_price: [
+          { required: true, message: '请输入商品价格', trigger: 'blur' },
+          { validator: checkGoodsPrice, trigger: 'blur' }
+        ],
+        goods_weight: [
+          { required: true, message: '请输入商品重量', trigger: 'blur' },
+          { validator: checkGoodsPrice, trigger: 'blur' }
+        ],
+        goods_number: [
+          { required: true, message: '请输入商品数量', trigger: 'blur' },
+          { validator: checkGoodsNum, trigger: 'blur' }
+        ]
+      },
+      // 级联选择器数据
+      cateList: [],
+      selectedKeys: [],
+      cascaderProps: {
+        value: 'cat_id',
+        label: 'cat_name',
+        children: 'children'
+      },
+      // 动态参数数组
+      manyVals: [],
+      // 静态属性数组
+      onlyVals: [],
+      // 商品图片数组
+      fileList: [
+
+      ],
+      // 头部请求对象
+      headerObj: {
+        Authorization: window.sessionStorage.getItem('token')
+      },
+      // 图片预览对话框可见
+      imgPreviewDialogVisible: false,
+      // 当前图片路径
+      curentImgPath: ''
+    }
+  },
+  methods: {
+    // 商品价格改变
+    priceChange () {
+
+    },
+    // 商品重量改变
+    weightChange () {
+
+    },
+    // 商品数量改变
+    numberChange () {
+
+    },
+    // 获取分类列表
+    async getCateList () {
+      const { data: res } = await this.$http.get('categories', { params: { type: 3 } })
+      this.cateList = res.data
+    },
+    // 检查分类列表是否被选择
+    checkCateList () {
+      console.log(this.selectedKeys)
+      if (this.selectedKeys.length !== 3) {
+        this.$message.warning('请选择商品分类')
+        return false
+      } else return true
+    },
+    // 获取选中tabs的序号
+    getTabIndex (item) {
+      if (this.checkCateList()) {
+        this.active = parseInt(item.name)
+      }
+    },
+    // 级联选择器已选中,获取参数信息
+    async hasChoosen () {
+      const { data: resOnly } = await this.$http.get(`categories/${this.selectedKeys[2]}/attributes`, { params: { sel: 'only' } })
+      const { data: resMany } = await this.$http.get(`categories/${this.selectedKeys[2]}/attributes`, { params: { sel: 'many' } })
+      // 将参数值转换成数组
+      resMany.data.forEach(item => {
+        item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
+      })
+      // 将数据存储到参数数组
+      this.manyVals = resMany.data
+      this.onlyVals = resOnly.data
+      // 将选中id赋值给goods_cat
+      this.goodsForm.goods_cat = this.selectedKeys
+      console.log(resOnly)
+      console.log(resMany)
+    },
+    // 预览图片
+    handlePreview (file) {
+      this.imgPreviewDialogVisible = true
+      this.curentImgPath = file.url
+    },
+    // 将图片临时路径存储到对象中
+    handleSuccess (res) {
+      const newPic = {
+        pic: res.data.tmp_path
+      }
+      this.goodsForm.pics.push(newPic)
+    },
+    handleRemove (file) {
+      const filePath = file.response.data.tmp_path
+      const index = this.goodsForm.pics.findIndex(ele =>
+        ele.pic === filePath
+      )
+    },
+    // 添加商品
+    addGoods () {
+      this.$refs.goodsRuleFormRef.validate(async (valid, failValue) => {
+        if (!valid) {
+          return this.$message.error('请按规范填写表单')
+        }
+        if (valid) {
+          const form = _.cloneDeep(this.goodsForm)
+          // 将selectedKeys转换为字符串储存到goods_cat
+          console.log(form)
+          form.goods_cat = form.goods_cat.join(',')
+          this.manyVals.forEach(item => {
+            const newInfo = {
+              attr_id: item.attr_id,
+              attr_value: item.attr_vals.join(' ')
+            }
+            this.goodsForm.attrs.push(newInfo)
+          })
+          this.onlyVals.forEach(item => {
+            const newInfo = {
+              attr_id: item.attr_id,
+              attr_value: item.attr_vals
+            }
+            this.goodsForm.attrs.push(newInfo)
+          })
+          form.attrs = this.goodsForm.attrs
+          // 3.发送数据
+          const { data: res } = await this.$http.post('goods', form)
+          if (res.meta.status !== 201) {
+            return this.$message('添加商品失败')
+          }
+          this.$message.success('添加商品成功')
+          this.active = 5
+        }
+      })
+    }
+  }
 }
 </script>
 <style lang="less" scoped>

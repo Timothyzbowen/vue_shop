@@ -25,26 +25,26 @@
 
 <script>
 export default {
-    created() {
-        this.getRightslist()
-    },
-    data() {
-        return {
-           rightslist: [],
-           rightsLevel: {
-               '0': ["一", "primary"],
-               '1': ["二", "success"],
-               '2': ["三", "warning"]
-           }
-            
-        }
-    },
-    methods: {
-        async getRightslist() {
-            const{data: res} = await this.$http.get('rights/list')
-            this.rightslist = res.data
-        }
+  created () {
+    this.getRightslist()
+  },
+  data () {
+    return {
+      rightslist: [],
+      rightsLevel: {
+        0: ['一', 'primary'],
+        1: ['二', 'success'],
+        2: ['三', 'warning']
+      }
+
     }
+  },
+  methods: {
+    async getRightslist () {
+      const { data: res } = await this.$http.get('rights/list')
+      this.rightslist = res.data
+    }
+  }
 }
 </script>
 

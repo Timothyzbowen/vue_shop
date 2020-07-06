@@ -61,7 +61,7 @@
                         :value="ordersRuleForm.city"
                         @change="changeProvince"
                         change-on-select
-                        
+
                     >
                     </el-cascader>
                 </el-form-item>
@@ -69,7 +69,7 @@
                     <el-input v-model="ordersRuleForm.street"></el-input>
                 </el-form-item>
             </el-form>
-            <span slot="footer" class="dialog-footer"> 
+            <span slot="footer" class="dialog-footer">
                 <el-button @click="editDialogVisible = false">取 消</el-button>
                 <el-button type="primary" @click="editDialogVisible = false">确 定</el-button>
             </span>
@@ -93,69 +93,69 @@
 <script>
 import city_data from './city_data.js'
 export default {
-    created() {
-        this.getOrdersList()
-    },
-    data() {
-        return{
-            queryInfo: {
-                query: '',
-                pagenum: 1,
-                pagesize: 10,
-            },
-            ordersTotal: '',
-            ordersData:[],
-            ordersKeyword: '',
-            ordersRuleForm: {
-                city: [],
-                street: ''
-            },
-            editDialogVisible: false,
-            city_data,
-            ordersRules: {
-                city: [ 
-                    { required: true, message: '请输入商品价格', trigger: 'blur' }
-                ],
-                street: [
-                    { required: true, message: '请输入详细地址', trigger: 'blur' }
-                ]
-            },
-            expressDialogVisible: false,
-            expressInfo: []
-        }
-    },
-    methods: {
-        async getOrdersList() {
-            console.log('ok')
-            this.queryInfo.query = this.ordersKeyword
-            const{data: res} = await this.$http.get('orders', {params: this.queryInfo})
-            if(res.meta.status !== 200) this.$message("获取订单信息失败")
-            res.data.goods.forEach( (item,index) => {
-                item.create_time = new Date(item.create_time).toLocaleString()
-                item.update_time = new Date(item.update_time).toLocaleString()
-            })
-            this.ordersTotal = res.data.total
-            this.ordersData = res.data.goods
-        },
-        handleSizeChange(val) {
-            this.queryInfo.pagesize = val
-            this.getOrdersList()
-        },
-        handleCurrentChange(val) {
-            this.queryInfo.pagenum = val
-            this.getOrdersList()
-        },
-        editAddress() {
-            this.editDialogVisible = true
-        },
-        async showExpress() {
-            this.expressDialogVisible = true
-            const{data: res} = await this.$http.get('/kuaidi/1106975712662')
-            if(res.meta.status !== 200) this.$message("获取物流信息失败！")
-            this.expressInfo = res.data
-        }
-
+  created () {
+    this.getOrdersList()
+  },
+  data () {
+    return {
+      queryInfo: {
+        query: '',
+        pagenum: 1,
+        pagesize: 10
+      },
+      ordersTotal: '',
+      ordersData: [],
+      ordersKeyword: '',
+      ordersRuleForm: {
+        city: [],
+        street: ''
+      },
+      editDialogVisible: false,
+      city_data,
+      ordersRules: {
+        city: [
+          { required: true, message: '请输入商品价格', trigger: 'blur' }
+        ],
+        street: [
+          { required: true, message: '请输入详细地址', trigger: 'blur' }
+        ]
+      },
+      expressDialogVisible: false,
+      expressInfo: []
     }
+  },
+  methods: {
+    async getOrdersList () {
+      console.log('ok')
+      this.queryInfo.query = this.ordersKeyword
+      const { data: res } = await this.$http.get('orders', { params: this.queryInfo })
+      if (res.meta.status !== 200) this.$message('获取订单信息失败')
+      res.data.goods.forEach((item, index) => {
+        item.create_time = new Date(item.create_time).toLocaleString()
+        item.update_time = new Date(item.update_time).toLocaleString()
+      })
+      this.ordersTotal = res.data.total
+      this.ordersData = res.data.goods
+    },
+    handleSizeChange (val) {
+      this.queryInfo.pagesize = val
+      this.getOrdersList()
+    },
+    handleCurrentChange (val) {
+      this.queryInfo.pagenum = val
+      this.getOrdersList()
+    },
+    editAddress () {
+      this.editDialogVisible = true
+    },
+    async showExpress () {
+      this.expressDialogVisible = true
+      const { data: res } = await this.$http.get('/kuaidi/1106975712662')
+      if (res.meta.status !== 200) this.$message('获取物流信息失败！')
+      this.expressInfo = res.data
+    }
+
+  }
 }
 </script>
 <style lang="less" scoped>

@@ -21,15 +21,15 @@
 </template>
 
 <script>
-	export default {
-		data() {
-			return {
-				loginForm: {
-					username: '',
-					password: ''
-				},
-				loginFormRules: {
-					username: [
+export default {
+  data () {
+    return {
+      loginForm: {
+        username: '',
+        password: ''
+      },
+      loginFormRules: {
+        username: [
             			{ required: true, message: '请输入用户名', trigger: 'blur' },
             			{ min: 3, max: 8, message: '长度在 3 到 8 个字符', trigger: 'blur' }
           				],
@@ -37,33 +37,34 @@
           				{ required: true, message: '请输入密码', trigger: 'blur' },
             			{ min: 3, max: 12, message: '长度在 3 到 12 个字符', trigger: 'blur' }
           				]
-				}
-			}
-		},
-		methods: {
-			loginFormReset() {
-				this.$refs.loginFormRef.resetFields()
-			},
-			login() {
-				this.$refs.loginFormRef.validate( async valid => {
-					if(!valid) return;
-					const { data: result } = await this.$http.post('login', this.loginForm)
-					if(result.meta.status !==200) { this.$message.error({
-						message: '登录失败',
-						duration: 1000
-					})}
-					else {this.$message.success({
-						message: '登录成功',
-						duration: 1000
-						})
-						window.sessionStorage.setItem('token', result.data.token)
-						this.$router.push('/home')
-				}
-
-				})
-			}
-		}
-	}
+      }
+    }
+  },
+  methods: {
+    loginFormReset () {
+      this.$refs.loginFormRef.resetFields()
+    },
+    login () {
+      this.$refs.loginFormRef.validate(async valid => {
+        if (!valid) return
+        const { data: result } = await this.$http.post('login', this.loginForm)
+        if (result.meta.status !== 200) {
+          this.$message.error({
+            message: '登录失败',
+            duration: 1000
+          })
+        } else {
+          this.$message.success({
+            message: '登录成功',
+            duration: 1000
+          })
+          window.sessionStorage.setItem('token', result.data.token)
+          this.$router.push('/home')
+        }
+      })
+    }
+  }
+}
 </script>
 
 <style lang="less" scoped>

@@ -124,180 +124,179 @@
 </template>
 <script>
 export default {
-    created() {
-        this.getCateList()
-        this.getParamList()
-    },
-    data() {
-      return {
-        cateList: [],
-        selectedKeys: [],
-        cascaderProps: {
-            value: 'cat_id',
-            label: 'cat_name',
-            children: 'children'
-        },
-        activeName: 'many',
-        paramsList: [],
-        manyParamData: [],
-        onlyParamData: [],
-        addDialogVisible: false,
-        editDialogVisible: false,
-        addRuleForm: {
-            attr_name: ''
-        },
-        addRules: {
-            attr_name: { required: true, message: '请输入参数名称', trigger: 'blur' }
-        },
-        editRuleForm: {
-            attr_name: ''
-        },
-        editRules: {
-            attr_name: { required: true, message: '请输入参数名称', trigger: 'blur' }
-        }
-        
-    }
-    },
-    computed: {
-        isdisable() {
-            if(this.selectedKeys.length !== 3){
-                return true
-            }
-            return false
-        },
-        catId() {
-            if(this.selectedKeys.length === 3){
-                return this.selectedKeys[this.selectedKeys.length - 1]
-            }
-            return null
-        },
-        addTitle() {
-            if(this.activeName == "many"){
-                return "添加动态参数"
-            }else {
-                return "添加静态属性"
-            }
-        },
-        editTitle() {
-            if(this.activeName == "many"){
-                return "修改动态参数"
-            }else {
-                return "修改静态属性"
-            }
-        },
-        lableName() {
-            if(this.activeName == "many"){
-                return "动态参数"
-            }else {
-                return "静态属性"
-            }
-        }
-    },
-    methods: {
-        async getCateList() {
-            const{data: res} = await this.$http.get('categories',{params: {type: 3}})
-            this.cateList = res.data
-        },
-        async hasChoosen() {
-            this.getParamData()
-        },
-        async getParamData() {
-            const{data: res} = await this.$http.get(`categories/${this.catId}/attributes`,{params: {sel: this.activeName}})
-            if(res.meta.status !==200) this.$message.error("获取失败")
-            //处理attr_val
-            res.data.forEach(item => {
-                item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
-                item.inputVisible = false
-                item.inputValue = ''
-            })
-            //根据不同情况挂载到不同数组中
-            if(this.activeName == "many") {
-                this.manyParamData = res.data
-            }else {
-                this.onlyParamData = res.data
-            }
-            console.log(res)
-        },
-        handleClick() {
-            this.getParamData()
-            this.$refs.addRuleFormRef.resetFields()
-        },
-        addDialog() {
-            this.addDialogVisible = true
-        },
-        cancleAdd() {
-            this.addDialogVisible = false
-            this.$refs.addRuleFormRef.resetFields()
-        },
-        addParam() {
-            this.$refs.addRuleFormRef.validate( async valid => {
-                if(!valid) return
-                else {
-                    const{data: res} = await this.$http.post(`categories/${this.catId}/attributes`,{ attr_name: this.addRuleForm.attr_name, attr_sel: this.activeName})
-                    if(res.meta.status !== 201) this.$message.error("添加参数失败")
-                    this.$message.success("添加参数成功")
-                    this.addDialogVisible = false
-                    this.getParamData()
-                }
-            })
-        },
-        async showEditDialog(id) {
-            this.editDialogVisible = true
-            const{data: res} = await this.$http.get(`categories/${this.catId}/attributes/${id}`,{params: {attr_sel: this.activeName}})
-            this.editRuleForm = res.data
-        },
-        async editParam() {
-            const{data: res} = await this.$http.put(`categories/${this.catId}/attributes/${this.editRuleForm.attr_id}`,{attr_name: this.editRuleForm.attr_name, attr_sel: this.activeName})
-            if(res.meta.status !== 200) this.$message.error("更新失败")
-            this.$message.success("更新成功")
-            this.editDialogVisible = false
-            this.getParamData()
-        },
-        async removeParam(id) {
-            const confirm = await this.$confirm('此操作将永久删除该值, 是否继续?', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }).catch(err => err)
-            if(confirm == "confirm") {
-                const{data: res} = await this.$http.delete(`categories/${this.catId}/attributes/${id}`)
-                if(res.meta.status !== 200) return this.$message.error("删除失败")
-                this.$message.success("删除成功")
-                this.getParamData()
-            }
-            if(confirm == "cancel") {
-                this.$message("删除取消")
-            }
-        },
-        async handleInputConfirm(row) {
-            if(row.inputValue.trim().length === 0) {
-                row.inputValue = ''
-                row.inputVisible = false
-                return
-            }
-            row.attr_vals.push(row.inputValue.trim())
-            row.inputValue = ''
-            row.inputVisible = false
-            this.saveAttrVals(row)
-            
-        },
-        showInput(row) {
-            row.inputVisible = true
-            this.$nextTick(_ => {
-            this.$refs.saveTagInput.$refs.input.focus();
-            });
-        },
-        delTag(i, row) {
-            row.attr_vals.splice(i, 1)
-            this.saveAttrVals(row)
-        },
-        async saveAttrVals(row) {
-            console.log(row.attr_vals)
-            const{data:res} = await this.$http.put(`categories/${this.catId}/attributes/${row.attr_id}`,{attr_name: row.attr_name, attr_sel: row.attr_sel, attr_vals: row.attr_vals.join(' ')})
-            console.log(row)
-        }
+  created () {
+    this.getCateList()
+    this.getParamList()
+  },
+  data () {
+    return {
+      cateList: [],
+      selectedKeys: [],
+      cascaderProps: {
+        value: 'cat_id',
+        label: 'cat_name',
+        children: 'children'
+      },
+      activeName: 'many',
+      paramsList: [],
+      manyParamData: [],
+      onlyParamData: [],
+      addDialogVisible: false,
+      editDialogVisible: false,
+      addRuleForm: {
+        attr_name: ''
+      },
+      addRules: {
+        attr_name: { required: true, message: '请输入参数名称', trigger: 'blur' }
+      },
+      editRuleForm: {
+        attr_name: ''
+      },
+      editRules: {
+        attr_name: { required: true, message: '请输入参数名称', trigger: 'blur' }
+      }
 
     }
+  },
+  computed: {
+    isdisable () {
+      if (this.selectedKeys.length !== 3) {
+        return true
+      }
+      return false
+    },
+    catId () {
+      if (this.selectedKeys.length === 3) {
+        return this.selectedKeys[this.selectedKeys.length - 1]
+      }
+      return null
+    },
+    addTitle () {
+      if (this.activeName == 'many') {
+        return '添加动态参数'
+      } else {
+        return '添加静态属性'
+      }
+    },
+    editTitle () {
+      if (this.activeName == 'many') {
+        return '修改动态参数'
+      } else {
+        return '修改静态属性'
+      }
+    },
+    lableName () {
+      if (this.activeName == 'many') {
+        return '动态参数'
+      } else {
+        return '静态属性'
+      }
+    }
+  },
+  methods: {
+    async getCateList () {
+      const { data: res } = await this.$http.get('categories', { params: { type: 3 } })
+      this.cateList = res.data
+    },
+    async hasChoosen () {
+      this.getParamData()
+    },
+    async getParamData () {
+      const { data: res } = await this.$http.get(`categories/${this.catId}/attributes`, { params: { sel: this.activeName } })
+      if (res.meta.status !== 200) this.$message.error('获取失败')
+      // 处理attr_val
+      res.data.forEach(item => {
+        item.attr_vals = item.attr_vals ? item.attr_vals.split(' ') : []
+        item.inputVisible = false
+        item.inputValue = ''
+      })
+      // 根据不同情况挂载到不同数组中
+      if (this.activeName == 'many') {
+        this.manyParamData = res.data
+      } else {
+        this.onlyParamData = res.data
+      }
+      console.log(res)
+    },
+    handleClick () {
+      this.getParamData()
+      this.$refs.addRuleFormRef.resetFields()
+    },
+    addDialog () {
+      this.addDialogVisible = true
+    },
+    cancleAdd () {
+      this.addDialogVisible = false
+      this.$refs.addRuleFormRef.resetFields()
+    },
+    addParam () {
+      this.$refs.addRuleFormRef.validate(async valid => {
+        if (!valid) return
+        else {
+          const { data: res } = await this.$http.post(`categories/${this.catId}/attributes`, { attr_name: this.addRuleForm.attr_name, attr_sel: this.activeName })
+          if (res.meta.status !== 201) this.$message.error('添加参数失败')
+          this.$message.success('添加参数成功')
+          this.addDialogVisible = false
+          this.getParamData()
+        }
+      })
+    },
+    async showEditDialog (id) {
+      this.editDialogVisible = true
+      const { data: res } = await this.$http.get(`categories/${this.catId}/attributes/${id}`, { params: { attr_sel: this.activeName } })
+      this.editRuleForm = res.data
+    },
+    async editParam () {
+      const { data: res } = await this.$http.put(`categories/${this.catId}/attributes/${this.editRuleForm.attr_id}`, { attr_name: this.editRuleForm.attr_name, attr_sel: this.activeName })
+      if (res.meta.status !== 200) this.$message.error('更新失败')
+      this.$message.success('更新成功')
+      this.editDialogVisible = false
+      this.getParamData()
+    },
+    async removeParam (id) {
+      const confirm = await this.$confirm('此操作将永久删除该值, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).catch(err => err)
+      if (confirm == 'confirm') {
+        const { data: res } = await this.$http.delete(`categories/${this.catId}/attributes/${id}`)
+        if (res.meta.status !== 200) return this.$message.error('删除失败')
+        this.$message.success('删除成功')
+        this.getParamData()
+      }
+      if (confirm == 'cancel') {
+        this.$message('删除取消')
+      }
+    },
+    async handleInputConfirm (row) {
+      if (row.inputValue.trim().length === 0) {
+        row.inputValue = ''
+        row.inputVisible = false
+        return
+      }
+      row.attr_vals.push(row.inputValue.trim())
+      row.inputValue = ''
+      row.inputVisible = false
+      this.saveAttrVals(row)
+    },
+    showInput (row) {
+      row.inputVisible = true
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
+    },
+    delTag (i, row) {
+      row.attr_vals.splice(i, 1)
+      this.saveAttrVals(row)
+    },
+    async saveAttrVals (row) {
+      console.log(row.attr_vals)
+      const { data: res } = await this.$http.put(`categories/${this.catId}/attributes/${row.attr_id}`, { attr_name: row.attr_name, attr_sel: row.attr_sel, attr_vals: row.attr_vals.join(' ') })
+      console.log(row)
+    }
+
+  }
 }
 </script>
 <style lang="less" scoped>
